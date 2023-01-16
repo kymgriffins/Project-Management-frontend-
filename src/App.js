@@ -1,24 +1,22 @@
-import logo from './logo.svg';
-import './App.css';
 
+import './App.css';
+import Projects from './Pages/Projects'
+import Tasks from './Pages/Tasks';
+import Teams from './Pages/Teams'
+import ProjectItem from './Pages/ProjectItem'
+import {Routes, Route} from 'react-router-dom'
+import AppLayout from './Components/AppLayout';
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Routes>
+      <Route path='/' element={<AppLayout />}>
+      <Route path='/projects' element={ <Projects/>}/>
+      <Route path="/project/" element={<ProjectItem />} />
+      <Route path='/teams' element={ <Teams/>}/>
+      <Route path='/tasks' element={ <Tasks/>}/>
+      </Route>
+    
+    </Routes>
   );
 }
 
