@@ -8,14 +8,14 @@ const sidebarNavItems = [
     {
         display: 'Dashboard',
         icon: <TaskIcon/>,
-        to: '/',
-        section: ''
+        to: '/home',
+        section: 'home'
     },
     {
         display: 'Projects',
         icon: <AccountTreeIcon/>,
         to: '/projects',
-        section: 'started'
+        section: 'projects'
     },
     {
         display: 'Teams',
@@ -24,10 +24,16 @@ const sidebarNavItems = [
         section: 'teams'
     },
     {
-        display: 'Tasks',
+        display: 'My Tasks',
         icon: <TaskIcon/>,
         to: '/tasks',
         section: 'tasks'
+    },
+    {
+        display: 'Calender',
+        icon: <TaskIcon/>,
+        to: '/tasks',
+        section: 'calender'
     }
 ]
 
@@ -54,9 +60,9 @@ const Sidebar = () => {
     }, [location]);
 
     return <div className='sidebar'>
-        {/* <div className="sidebar__logo">
-            Animate
-        </div> */}
+        <div className="sidebar__logo">
+            ProjectX
+        </div>
         <div ref={sidebarRef} className="sidebar__menu">
             <div
                 ref={indicatorRef}
