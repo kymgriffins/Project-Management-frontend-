@@ -30,10 +30,10 @@ const sidebarNavItems = [
         section: 'tasks'
     },
     {
-        display: 'Calender',
+        display: 'Meetings',
         icon: <TaskIcon/>,
-        to: '/tasks',
-        section: 'calender'
+        to: '/meetings',
+        section: 'meetings'
     }
 ]
 
@@ -61,7 +61,7 @@ const Sidebar = () => {
 
     return <div className='sidebar'>
         <div className="sidebar__logo">
-            ProjectX
+            Project 101 
         </div>
         <div ref={sidebarRef} className="sidebar__menu">
             <div

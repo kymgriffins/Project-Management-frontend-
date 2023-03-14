@@ -32,7 +32,7 @@ export const TaskBox = ({ icon,color,bgColor, testId, primaryText, secondaryText
                     <AssignmentIcon sx={{ width: "2.7rem", height: "2.7rem", bgcolor: bgColor, color: color}} />
                 </Grid> 
                 <Grid item>
-                    <Typography color="#171717" fontSize="1.25rem" lineHeight="29px" fontWeight="500" data-testid={testId}>{primaryText}</Typography>
+                    <Typography color="#171717" fontSize="1rem" lineHeight="29px" fontWeight="500" data-testid={testId}>{primaryText}</Typography>
                     <Typography color="#B9B9B9" fontSize="0.875rem" lineHeight="17px" fontWeight="500">{secondaryText}</Typography>
                 </Grid>
             </Grid>

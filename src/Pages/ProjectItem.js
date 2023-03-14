@@ -30,6 +30,7 @@ import { Visibility } from "@mui/icons-material";
 import { useAuth } from "../Auth/AuthProvider";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
+import { StatusBox } from "../Components/StatusBox";
 const ProjectItem = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,21 +38,23 @@ const ProjectItem = () => {
   console.log("authState", authState?.user?.user_id);
   const userId = authState.user.user_id;
   const [tasks, setTasks] = useState([]);
+  const [taskName, setTaskName] = useState();
   const projectId = location.state?.row?.id;
+  const projectName = location.state?.row?.name;
   const URL = `http://127.0.0.1:8000/tasks/project/${projectId}`;
 
   const fetchTasks = () => {
     axios.get(URL).then((response) => {
-      setTasks(response.data).catch((error) =>
-        console.log("This is the error", error)
-      );
+      setTasks(response.data);
+      console.log(response.data);
     });
   };
   const handleShowTask = useCallback(
     (id, row) => () => {
       navigate("/tasks/item", { state: { id: id, row: row } });
+
       // console.log("id", id);
-      // console.log("row", row);
+      console.log("row", row);
     },
     []
   );
@@ -106,8 +109,48 @@ const ProjectItem = () => {
       flex: 0.1,
     },
 
-    { field: "status", headerName: "Status", description: "", flex: 0.1 },
-    { field: "priority", headerName: "Priority", description: "", flex: 0.1 },
+    {
+      field: "status",
+      headerName: "Status",
+      description: "",
+      flex: 0.1,
+      renderCell: (params) => {
+        if (params.row.status === "pending") {
+          return <StatusBox status="Pending" color="danger" />;
+          // return(
+
+          //   <Chip label="Facebook" color="primary" icon={<FacebookIcon />} />
+          // )
+        }
+        if (params.row.status === "inprogress") {
+          return <StatusBox status="inprogress" color="primaryLight" />;
+        }
+        if (params.row.status === "completed") {
+          return <StatusBox status="completed" color="success" />;
+        }
+      },
+    },
+    {
+      field: "priority",
+      headerName: "Priority",
+      description: "",
+      flex: 0.1,
+      renderCell: (params) => {
+        if (params.row.priority === "high") {
+          return <StatusBox status="High" color="danger" />;
+          // return(
+
+          //   <Chip label="Facebook" color="primary" icon={<FacebookIcon />} />
+          // )
+        }
+        if (params.row.priority === "medium") {
+          return <StatusBox status="Medium" color="primaryLight" />;
+        }
+        if (params.row.priority === "low") {
+          return <StatusBox status="Low" color="success" />;
+        }
+      },
+    },
     {
       field: "planned_end_date",
       headerName: "Due Date",
@@ -141,27 +184,13 @@ const ProjectItem = () => {
     <div>
       <Container maxWidth="xl">
         <Box sx={{ backgroundColor: "#ffffff", pt: 2 }}>
-          {/* <Grid container justifyContent="end" sx={{ mb: 2, mr: 3 }}>
-            <TextField
-              fullWidth={false}
-              style={{ mr: 3 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SvgIcon color="action" fontSize="small">
-                      <SearchIcon />
-                    </SvgIcon>
-                  </InputAdornment>
-                ),
-              }}
-              placeholder="Search Case"
-              variant="outlined"
-            />
+          <Grid container justifyContent="Start" sx={{ mb: 2, mr: 3 }}>
+            <Typography variant="h5" component="h5">
+              Tasks in {projectName} Project
+            </Typography>
 
-            <Button variant="contained" startIcon={<AddIcon />} >Add</Button>
-onClick={handleCreateDialogOpen}
-
-          </Grid> */}
+            {/* onClick={handleCreateDialogOpen} */}
+          </Grid>
           <DataGridLayout>
             <DataGrid
               rowHeight={50}

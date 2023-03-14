@@ -100,7 +100,7 @@ const Login = () => {
           >
             <img
               style={{ width: "100%", height: "100%" }}
-              src="https://images.pexels.com/photos/7662060/pexels-photo-7662060.jpeg?cs=srgb&dl=pexels-szab%C3%B3-viktor-7662060.jpg&fm=jpg"
+              src="https://images.unsplash.com/photo-1527219525722-f9767a7f2884?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=873&q=80"
               alt="Logo"
             />
           </Grid>
