@@ -87,7 +87,7 @@ const Sidebar = () => {
     // find user object with the above user_id in http://127.0.0.1:8000/auth/register/
     const userId = currentUser?.user_id;
     axios
-    .get(`http://127.0.0.1:8000/auth/register/`)
+    .get(`https://web-production-f86e.up.railway.app/auth/register/`)
     .then((response) => {
       const user = response.data.find((u) => u.id === userId); // Filter user with matching user_id
       console.log(user); // user object
