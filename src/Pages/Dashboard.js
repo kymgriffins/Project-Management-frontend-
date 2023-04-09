@@ -13,7 +13,7 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import FeedIcon from '@mui/icons-material/Feed';
-const URL = "http://127.0.0.1:8000/projects/";
+const URL = "https://web-production-f86e.up.railway.app/projects/";
 const Dashboard = () => {
   const [projects,setProjects]=useState([])
   const [allProjects,setAllProjects] = useState("")
@@ -36,12 +36,12 @@ const Dashboard = () => {
   };
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await axios.get("http://127.0.0.1:8000/auth/register/");
+      const response = await axios.get("https://web-production-f86e.up.railway.app/auth/register/");
       setUsersCount(response.data.length);
     
     };
     const fetchReports = async () => {
-      const response = await axios.get("http://127.0.0.1:8000/dailyrecords/", {
+      const response = await axios.get("https://web-production-f86e.up.railway.app/dailyrecords/", {
         params: {
           roles: "member",
         },
@@ -50,7 +50,7 @@ const Dashboard = () => {
    
     };
     const fetchInvoices = async () => {
-      const response = await axios.get("http://127.0.0.1:8000/invoices/", {
+      const response = await axios.get("https://web-production-f86e.up.railway.app/invoices/", {
         params: {
           roles: "member",
         },

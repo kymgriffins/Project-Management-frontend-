@@ -42,7 +42,8 @@ import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 
-const URL = "http://127.0.0.1:8000/materials/";
+// const URL = "http://127.0.0.1:8000/materials/";
+const URL = "https://web-production-f86e.up.railway.app/materials/"
 
 const Materials = () => {
   const [materials, setMaterials] = useState({

@@ -28,7 +28,8 @@ const Login = () => {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const { login } = useAuth();
-  const URL = `http://127.0.0.1:8000/auth/token/`;
+  // const URL = `http://127.0.0.1:8000/auth/token/`;
+  const URL = "https://web-production-f86e.up.railway.app/auth/token/"
   const [formData, setFormData] = useState({
     email: "",
     password: "",

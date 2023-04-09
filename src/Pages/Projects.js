@@ -79,9 +79,11 @@ const theme = createTheme({
 });
 
 // const URL = "http://127.0.0.1:8000/projects/";
-const BLUPRINTURL = "http://127.0.0.1:8000/blueprint/"
-const URL = "http://127.0.0.1:8000/projects/";
-// const BLUPRINTURL = "https://posthere.io/a8f2-462f-ba98"
+// const BLUPRINTURL = "http://127.0.0.1:8000/blueprint/"
+// const URL = "http://127.0.0.1:8000/projects/";
+
+const URL = "https://web-production-f86e.up.railway.app/projects/"
+const BLUPRINTURL = "https://web-production-f86e.up.railway.app/blueprint/"
 
 const Projects = () => {
   const [project, setProject] = useState({

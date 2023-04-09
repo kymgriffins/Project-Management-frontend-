@@ -79,9 +79,12 @@ const theme = createTheme({
   },
 });
 
-const URL = "http://127.0.0.1:8000/dailyrecords/";
-const URL2 = "http://127.0.0.1:8000/material/used/";
-const URL3 = "http://127.0.0.1:8000/record_pic/";
+// const URL = "http://127.0.0.1:8000/dailyrecords/";
+// const URL2 = "http://127.0.0.1:8000/material/used/";
+// const URL3 = "http://127.0.0.1:8000/record_pic/";
+const URL = "https://web-production-f86e.up.railway.app/dailyrecords/"
+const URL2 =   "https://web-production-f86e.up.railway.app/material/used/"
+const URL3 = "https://web-production-f86e.up.railway.app/record_pic/"
 
 // const URL = "https://posthere.io/a8f2-462f-ba98";
 // const URL2 = "https://posthere.io/a8f2-462f-ba98";
@@ -261,7 +264,7 @@ const Reports = () => {
   };
   useEffect(() => {
     const fetchMaterials = async () => {
-      const response = await axios.get("http://127.0.0.1:8000/materials/");
+      const response = await axios.get("https://web-production-f86e.up.railway.app/materials/");
       setMaterials(response.data);
 
       // console.log(":::", response.data);
