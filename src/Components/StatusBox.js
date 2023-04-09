@@ -22,20 +22,27 @@ const renderStatusTextColor = (color) => {
     }
   }
   
- const renderStatusBgColor = (color) => {
+  const renderStatusBgColor = (color) => {
     switch (color) {
       case "success":
         return "#b9f6ca60";
       case "danger":
-        return "#fbe9e7"
+        return "#ffcdd2";
       case "warning":
-        return "#FFF8E1"
+        return "#FFF8E1";
       case "primaryLight":
-        return "#e8eaf6"
+        return "#e8eaf6";
+      case "info":
+        return "#bbdefb";
+      case "secondary":
+        return "#f5f5f5";
+      case "error":
+        return "#ffcdd2";
       default:
-        return "#e8eaf6"
+        return "#e8eaf6";
     }
-  }
+  };
+  
 
 export const StatusBox = ({    status,
   color,

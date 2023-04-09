@@ -39,6 +39,7 @@ import _ from "lodash";
 import { blue, green, red, orange } from "@mui/material/colors";
 import { StatusBox } from "../Components/StatusBox";
 const Tasks = () => {
+ 
   const navigate = useNavigate();
   const { authState } = useAuth();
   console.log("authState", authState?.user?.user_id);
@@ -69,6 +70,8 @@ const Tasks = () => {
   useEffect(() => {
     fetchTasks();
   }, [tasks]);
+
+
   // console.log("Tasks", tasks);
   let color = "inherit";
 

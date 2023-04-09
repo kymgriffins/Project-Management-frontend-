@@ -5,7 +5,7 @@ import axios from "axios";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Alert from "@mui/material/Alert";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   FormControlLabel,
   Snackbar,
@@ -19,9 +19,11 @@ import {
   Typography,
 } from "@mui/material";
 const Login = () => {
-    const { authState } = useAuth();
+  const { authState } = useAuth();
 
   const [snackBarMessage, setSnackBarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("");
+
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   const navigate = useNavigate();
   const [error, setError] = useState("");
@@ -49,14 +51,19 @@ const Login = () => {
       // Extract the token from the response
       const token = res.data.access;
       console.log(token, "TOKEN");
-      console.log(res)
-      
-    login(token);
-      
+      console.log(res);
+
+      login(token);
+
       // Login the user by setting the token
-      
+      setSnackBarMessage("Login successful!");
+      setSnackBarOpen(true);
+      setSnackbarSeverity("success");
     } catch (err) {
       setError("Invalid email or password");
+      setSnackBarMessage("Invalid email or password");
+      setSnackBarOpen(true);
+      setSnackbarSeverity("danger");
     }
   };
   const handleSnackBarClose = (event, reason) => {
@@ -67,7 +74,7 @@ const Login = () => {
   };
   useEffect(() => {
     if (authState.authenticated) {
-      navigate("/home");
+      navigate("/");
     }
   }, [authState.authenticated, navigate]);
 
@@ -78,6 +85,20 @@ const Login = () => {
         autoHideDuration={6000}
         onClose={handleSnackBarClose}
         message={snackBarMessage}
+        severity={snackbarSeverity}
+        ContentProps={{
+          sx: {
+            backgroundColor:
+              snackbarSeverity === "success"
+                ? "#4caf50"
+                : snackbarSeverity === "error"
+                ? "#f44336"
+                : snackbarSeverity === "warning"
+                ? "#ff9800"
+                : "#2196f3",
+            color: "#ffffff",
+          },
+        }}
         action={
           <IconButton
             size="small"
@@ -99,8 +120,8 @@ const Login = () => {
             alignItems="center"
           >
             <img
-              style={{ width: "100%", height: "100%" }}
-              src="https://images.unsplash.com/photo-1527219525722-f9767a7f2884?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=873&q=80"
+             
+              src="https://images.unsplash.com/photo-1429497419816-9ca5cfb4571a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=871&q=80"
               alt="Logo"
             />
           </Grid>
@@ -121,7 +142,7 @@ const Login = () => {
               color="primary"
             >
               {" "}
-              PROJECT 101
+              JENGA
             </Typography>
             <Typography variant="body1" sx={{ mb: 2 }} color="#aaaaaa">
               Fill in the following details to login
@@ -149,6 +170,7 @@ const Login = () => {
               type="password"
               value={formData.password}
               autoFocus={false}
+              fullWidth={true}
             />
 
             <Grid
@@ -164,9 +186,22 @@ const Login = () => {
                   sx={{ color: "#5c61c5" }}
                 />
               </FormGroup>
-              {/* <Link variant="body2" to='/forgot-password' className="link" sx={{ textDecoration: 'none', color: "primary", mt: 1.5 }}> */}
-              Forgot password?
-              {/* </Link> */}
+              <Link
+                variant="body2"
+                to="/signup"
+                className="link"
+                sx={{ textDecoration: "none", color: "primary", mt: 1.5 }}
+              >
+                Don't have an account? Signup
+              </Link>
+              <Link
+                variant="body2"
+                to="/forgot-password"
+                className="link"
+                sx={{ textDecoration: "none", color: "primary", mt: 1.5 }}
+              >
+                Forgot password?
+              </Link>
             </Grid>
             <Button
               sx={{ mt: 5 }}
