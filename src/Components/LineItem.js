@@ -6,7 +6,8 @@ import { TextField } from '@mui/material';
 import { Select, MenuItem } from '@mui/material';
 import axios from 'axios';
 
-const URL = "http://127.0.0.1:8000/materials/";
+import { URL } from '../Constants/constants';
+
 const LineItem = ({
   index,
   name,
@@ -14,11 +15,12 @@ const LineItem = ({
   // quantity,
   price,
   totalCost,
-  
   changeHandler,
   focusHandler,
   deleteHandler,
   currencyFormatter,
+  materialUsages,
+  setMaterialUsagesData,
 }) => {
   const [nameValue, setNameValue] = useState(name);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
@@ -28,9 +30,9 @@ const LineItem = ({
   const [subtotal, setSubtotal] = useState(quantity * unitCost);
 
   const fetchMaterials = () => {
-    axios.get(URL).then((response) => {
+    axios.get(`${URL}materials`).then((response) => {
       setAllMaterials(response.data).catch((error) =>
-        console.log("This is the error", error)
+        console.log('This is the error', error),
       );
     });
   };
@@ -48,23 +50,23 @@ const LineItem = ({
       changeHandler(index)({
         target: {
           name: 'unitCost',
-          value: material.unit_cost
-        }
+          value: material.unit_cost,
+        },
       });
     }
   }, [nameValue, allMaterials]);
 
   const handleNameChange = (event) => {
     const material = allMaterials.find(
-      (material) => material.name === event.target.value
+      (material) => material.name === event.target.value,
     );
     setSelectedMaterial(material);
     setNameValue(event.target.value);
     changeHandler(index)({
       target: {
         name: 'name',
-        value: event.target.value
-      }
+        value: event.target.value,
+      },
     });
   };
 
@@ -72,11 +74,19 @@ const LineItem = ({
     const newQuantity = event.target.value;
     setQuantity(newQuantity);
     setSubtotal(newQuantity * unitCost);
+
+    const newMaterialUsage = { material: { id: selectedMaterial?.id }, quantity_used: newQuantity };
+    setMaterialUsagesData(prevState => {
+      const updatedState = [...prevState];
+      updatedState[index] = newMaterialUsage;
+      return updatedState;
+    });
+    
     changeHandler(index)({
       target: {
         name: 'quantity',
-        value: newQuantity
-      }
+        value: newQuantity,
+      },
     });
   };
 
@@ -87,11 +97,10 @@ const LineItem = ({
     changeHandler(index)({
       target: {
         name: 'unitCost',
-        value: newPrice
-      }
+        value: newPrice,
+      },
     });
   };
-
 
 
   return (
@@ -151,8 +160,8 @@ const LineItem = ({
       <button
   type="button"
   className={'deleteItem'}
-  onClick={() => deleteHandler(index)
-  }
+  onClick={() => deleteHandler(index)}
+
 >
   <DeleteIcon size="1.25em" />
 </button>

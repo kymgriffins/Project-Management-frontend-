@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
@@ -16,9 +16,12 @@ const LineItems = ({items,   index,
   changeHandler,
   focusHandler,
   deleteHandler,
-  currencyFormatter,reorderHandler,addHandler }) => {
+  currencyFormatter,reorderHandler,addHandler,materialUsages}) => {
  
   const [lineItems, setLineItems] = useState(items);
+  useEffect(() => {
+    setLineItems(items);
+  }, [items]);
 
   const handleDragEnd = (result) => {
     if (!result.destination) {

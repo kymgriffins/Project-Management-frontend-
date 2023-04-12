@@ -29,7 +29,10 @@
             transition: color 0.3s ease-in-out;
 
             &.active {
-                color: #020202;
+                background-color: #9040FF;
+  color: white;
+
+  
             }
 
             &__icon {
@@ -47,10 +50,14 @@
             left: 50%;
             width: calc(100% - 30px);
             border-radius: 10px;
-            background-color: #0567FB;
+        
             z-index: -1;
             transform: translateX(-50%);
             transition: 0.3s ease-in-out;
         }
     }
 }
+.sidebar__menu__indicator {
+    transition: transform 0.3s ease-in-out;
+  }
+  

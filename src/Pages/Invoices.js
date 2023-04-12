@@ -52,15 +52,15 @@ import SkipNextIcon from "@mui/icons-material/SkipNext";
 import '../Components/Invoice.scss';
 import LineItem from "../Components/LineItem";
 import LineItems from "../Components/LineItems";
-
+import { URL } from '../Constants/constants';
 import { v4 as uuidv4 } from 'uuid';
-const URL = "http://127.0.0.1:8000/invoices/";
+// const URL = "http://127.0.0.1:8000/invoices/";
 // const URL = "https://posthere.io/a8f2-462f-ba98"
 
 const Invoices = () => {
 
   const [invoices, setInvoices] = useState({
-    amount: "",
+   
     isPaid: false,
     created_by: "",
  
@@ -75,6 +75,7 @@ const Invoices = () => {
   const [selectedProject, setSelectedProject] = useState("");
   const [materials, setMaterials] = useState([]);
   const [username,setUsername]=useState("")
+  const [users, setUsers] = useState([]);
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -130,22 +131,17 @@ const Invoices = () => {
     event.target.select();
   };
 
-  const handlePayButtonClick = () => {
-    alert('Not implemented');
-  };
+
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'KSH',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount);
   };
 
-  const calcTaxAmount = (c) => {
-    return c * (taxRate / 100);
-  };
 
   const calcLineItemsTotal = () => {
     return lineItems.reduce((prev, cur) => prev + cur.quantity * cur.unitCost, 0);
@@ -159,73 +155,76 @@ const Invoices = () => {
     return calcLineItemsTotal() + calcTaxTotal();
   };
 
-  const handleAddField = () => {
-    setMaterialUsages([...materialUsages, { material: "", quantity_used: "" }]);
-  };
+  
 
-  const handleRemoveField = (index) => {
-    const newMaterialUsages = [...materialUsages];
-    newMaterialUsages.splice(index, 1);
-    setMaterialUsages(newMaterialUsages);
-  };
-
-  const handleMaterialChange = (index, event) => {
-    const newMaterialUsages = [...materialUsages];
-    newMaterialUsages[index].material = event.target.value;
-    setMaterialUsages(newMaterialUsages);
-  };
-
-  const handleUsageChange = (index, event) => {
-    const newMaterialUsages = [...materialUsages];
-    newMaterialUsages[index].quantity_used = event.target.value;
-    setMaterialUsages(newMaterialUsages);
-  };
   const createInvoices = async (e) => {
     e.preventDefault();
+    const lineItemsTotal = calcLineItemsTotal();
+    const taxTotal = calcTaxTotal();
+    const grandTotal = calcGrandTotal();
   
     const materialUsagesData = materialUsages.map((materialUsage, index) => {
       return {
-        material: { id: materialUsage.material.id }, // <-- add id property
+        material: { id: materialUsage.material.id },
         quantity_used: materialUsage.quantity_used,      
       };
     });
-    
-    
   
-    const data={
-      amount: invoices.amount,
+    // Step 1: Create the invoice
+    const invoiceData = {
+      amount: grandTotal,
       isPaid: invoices.isPaid,
-      materials: materialUsagesData, // update invoices.materials with materialUsagesData
       created_by:currentUser?.user_id,
-      project:selectedProject
+      // project:selectedProject
+  
+      project: 4,
     };
   
     try {
-      const response = await axios.post(URL, data, {
-        // add any additional options if needed
-      });
-      console.log(response.data);
-      setSnackBarMessage("Invoice created successfully.");
-      setSnackbarSeverity("success");
-      setSnackBarOpen(true);
-      setPopperOpen(false);
+      const createInvoiceResponse = await axios.post(`${URL}invoices/`, invoiceData);
+      if (createInvoiceResponse.status === 201) {
+        const invoiceId = createInvoiceResponse.data.id;
+  
+        // Step 2: Create the invoice items
+        const invoiceItemsData = materialUsagesData.map((materialUsage) => {
+          return {
+            materials: materialUsage.material,
+            quantity: materialUsage.quantity_used,
+            invoice: { id: invoiceId },
+          };
+        });
+  
+        const createInvoiceItemsResponses = await Promise.all(
+          invoiceItemsData.map((data) => axios.post(`${URL}invoice-items/`, data))
+        );
+  
+        console.log(createInvoiceItemsResponses);
+  
+        setSnackBarMessage("Invoice created successfully.");
+        setSnackbarSeverity("success");
+        setSnackBarOpen(true);
+        setPopperOpen(false);
+      } else {
+        throw new Error("Failed to create invoice");
+      }
     } catch (error) {
       console.error(error);
-      setSnackBarMessage("Failed to create material.");
+      setSnackBarMessage("Failed to create invoice.");
       setSnackbarSeverity("error");
       setSnackBarOpen(true);
     }
   };
+
   
   const fetchInvoices = () => {
-    axios.get(URL).then((response) => {
-      const orderedInvoices = _.orderBy(response.data, ["created_at"], ["desc"]);
+    axios.get(`${URL}invoices`).then((response) => {
+      const invoiceedInvoices = _.orderBy(response.data, ["created_at"], ["desc"]);
   
       // Process the data as needed
-      const rows = orderedInvoices.map((invoice, index) => ({
+      const rows = invoiceedInvoices.map((invoice, index) => ({
         id: index +1,
-        created_by: invoice?.created_by?.username,
-        project: invoice?.project?.name,
+        created_by: invoice?.created_by,
+        project: invoice?.project,
         amount: invoice.amount,
         date_created: invoice.date_created,
         invoiceNumber: invoice.invoice_number,
@@ -242,7 +241,7 @@ const Invoices = () => {
     });
   };
   axios
-  .get(`http://127.0.0.1:8000/auth/register/`)
+  .get(`${URL}auth/register/`)
   .then((response) => {
     const user = response.data.find((u) => u.id === userId); // Filter user with matching user_id
     console.log(user); // user object
@@ -254,7 +253,13 @@ const Invoices = () => {
     console.log(error);
   });
   useEffect(() => {
+    const fetchUsers = async () => {
+      const response = await axios.get(`${URL}auth/register/`);
+      setUsers(response.data);
+    
+    };
     fetchInvoices();
+    fetchUsers()
   }, []);
   
   const handleSnackBarClose = (event, reason) => {
@@ -289,7 +294,7 @@ const Invoices = () => {
   console.log("Invoices", invoices);
   useEffect(() => {
     const fetchProjects = async () => {
-      const response = await axios.get("http://127.0.0.1:8000/projects/");
+      const response = await axios.get(`${URL}projects/`);
       setProjects(response.data);
     };
 
@@ -300,7 +305,7 @@ const Invoices = () => {
   };
   useEffect(() => {
     const fetchMaterials = async () => {
-      const response = await axios.get("http://127.0.0.1:8000/materials/");
+      const response = await axios.get(`${URL}materials/`);
       setMaterials(response.data);
 
       console.log(":::", response.data);
@@ -317,43 +322,53 @@ const Invoices = () => {
       description: "",
       flex: 0.1,
       renderCell: (params) => {
+        console.log(params);
+        const userId = params.row?.created_by;
+        const user = users.find((p) => p.id === userId);
+        const userName = user?.username;
+    
         return (
           <Typography variant="body2" component="body2">
-            {params.value}
+            {userName}
           </Typography>
         );
       },
     },
     {
       field: "project",
-      headerName: "Project",
+      headerName: "Project Name",
       description: "",
-      flex: 0.1,
+      flex: 0.2,
       renderCell: (params) => {
+        console.log(params);
+        const projectId = params.row?.project;
+        const project = projects.find((p) => p.id === projectId);
+        const projectName = project?.name;
+    
         return (
           <Typography variant="body2" component="body2">
-            {params.value}
+            {projectName}
           </Typography>
         );
       },
     },
     { field: "amount", headerName: "Amount", description: "", flex: 0.1 },
     
-    {
-      field: "materials",
-      headerName: "Materials",
-      description: "",
-      flex: 0.2,
-      renderCell: (params) => {
-        return (
-          <Typography variant="body2" component="body2">
-            {params.value && params.value.length > 0 ?
-              params.value.map((material) => material.name).join(", ") : ""
-            }
-          </Typography>
-        );
-      },
-    },
+    // {
+    //   field: "materials",
+    //   headerName: "Materials",
+    //   description: "",
+    //   flex: 0.2,
+    //   renderCell: (params) => {
+    //     return (
+    //       <Typography variant="body2" component="body2">
+    //         {params.value && params.value.length > 0 ?
+    //           params.value.map((material) => material.name).join(", ") : ""
+    //         }
+    //       </Typography>
+    //     );
+    //   },
+    // },
     {
       field: "date_created",
       headerName: "Date Created",
@@ -461,97 +476,7 @@ const Invoices = () => {
              
                 
                 <DialogContent>
-                  {/* <DialogContentText>
-                    Fill in the details to create a new invoice
-                  </DialogContentText> */}
-                  {/* <Grid container spacing={2}>
-                    
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        autoFocus
-                        margin="dense"
-                        id="amount"
-                        label="Amount"
-                        type="number"
-                        value={invoices.amount}
-                        fullWidth
-                        // multiline
-                        // rows={5}
-                        variant="outlined"
-                        onChange={handleInvoicesChange}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <InputLabel id="team-select-label">
-                        Select Project
-                      </InputLabel>
-                      <Select
-                        labelId="team-select-label"
-                        value={selectedProject}
-                        onChange={handleSelectProject}
-                        style={{ width: "100%" }}
-                      >
-                        {projects.map((item) => (
-                          <MenuItem key={item.id} value={item.id}>
-                            {item.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </Grid>
-                                               
-<Grid item xs={12} md={6} sx={{ my: 2 }}>
-  {materialUsages.map((materialUsage, index) => (
-    <div key={index} sx={{ display: 'flex', alignItems: 'center', my: 1 }}>
-      <FormControl fsx={{ width: '50%', mr: 2 }}>
-        <InputLabel id={`material-select-label-${index}`}>Material</InputLabel>
-        <Select
-          labelId={`material-select-label-${index}`}
-          value={materialUsage.material}
-          onChange={(event) => handleMaterialChange(index, event)}
-        >
-          {materials.map((material) => (
-            <MenuItem key={material.id} value={material}>
-              {material.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
-      <TextField
-        label="Usage"
-        value={materialUsage.quantity_used}
-        onChange={(event) => handleUsageChange(index, event)}
-        sx={{ flex: 1, marginLeft: 2 }}
-      />
-
-      {index > 0 && (
-        <IconButton onClick={() => handleRemoveField(index)} sx={{ marginLeft: 2 }}>
-          <DeleteIcon />
-        </IconButton>
-      )}
-
-      {index === materialUsages.length - 1 && (
-        <IconButton onClick={handleAddField} sx={{ marginLeft: 2 }}>
-          <AddIcon />
-        </IconButton>
-      )}
-    </div>
-  ))}
-</Grid>
-                    <Grid item xs={12} md={6}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            id="isPaid"
-                            checked={invoices.isPaid}
-                            onChange={handleInvoicesChange}
-                            color="primary"
-                          />
-                        }
-                        label="Is Paid"
-                      />
-                    </Grid>
-                  </Grid> */}
+                
                   <div className={'invoice'}>
         <div className={'brand'}>
           <img src="https://via.placeholder.com/150x50.png?text=logo" alt="Logo" className={'logo'} />
@@ -620,7 +545,7 @@ const Invoices = () => {
         </div>
 
         <div className={'pay'}>
-          <button className={'payNow'} onClick={handlePayButtonClick}>Pay Now</button>
+          <button className={'payNow'} onClick={createInvoices}> Create Invoice</button>
         </div>
 
         

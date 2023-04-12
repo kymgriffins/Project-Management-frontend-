@@ -26,6 +26,7 @@ import {
   DialogContentText,
   DialogTitle,
   MenuItem,
+  ListItem, ListItemText,
 } from "@mui/material";
 import { DataGridLayout } from "../Components/DataGridLayout";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -43,17 +44,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import Stack from "@mui/material/Stack";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import moment from "moment";
+import { URL } from "../Constants/constants";
 
-function Alert(props) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
-function CustomToolbar() {
-  return (
-    <GridToolbar>
-      <TextField label="Search" variant="standard" />
-    </GridToolbar>
-  );
-}
+
 const ProjectItem = () => {
   const [task, setTask] = useState({
     name: "",
@@ -65,6 +58,11 @@ const ProjectItem = () => {
     end: "",
     budget: "",
   });
+  const [building, setBuilding]= useState({
+    floors :"",
+    owner:"",
+    project : ""
+  })
 
   const [open, setOpen] = useState(false);
   const [poperOpen, setPopperOpen] = React.useState(false);
@@ -89,7 +87,7 @@ console.log("ROW ",location?.state?.row)
 // console.log("IMG", IMG)
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await axios.get("http://127.0.0.1:8000/auth/register/", {
+      const response = await axios.get(`${URL}auth/register/`, {
         params: {
           roles: "member",
         },
@@ -97,16 +95,13 @@ console.log("ROW ",location?.state?.row)
       setUsers(response.data.filter((user) => user.roles.includes("member")));
       console.log(":::", response.data);
     };
-    const fetchTeams = async () => {
-      const response = await axios.get("http://127.0.0.1:8000/teams");
-      setTeams(response.data);
-    };
+   
     const fetchRecords = async () => {
-      const response = await axios.get(`http://127.0.0.1:8000/projectsrecords/${projectId}`);
+      const response = await axios.get(`${URL}projectsrecords/${projectId}`);
       setRecords(response.data);
     };
     fetchUsers();
-    fetchTeams();
+ 
     fetchRecords()
   }, []);
   console.log("usersSelected", selectedUser);
@@ -114,15 +109,7 @@ console.log("ROW ",location?.state?.row)
   const projectId = location.state?.row?.id;
   const projectName = location.state?.row?.name;
   console.log("STATE", location?.state?.row)
-  const URL = `http://127.0.0.1:8000/taskitem/${projectId}`;
-  // const URL = `http://127.0.0.1:8000/tasks/`;
 
-  const fetchTasks = () => {
-    axios.get(URL).then((response) => {
-      setTasks(response.data);
-      console.log(response.data,"TASKS");
-    });
-  };
   const handleShowTask = useCallback(
     (id, row) => () => {
       navigate("/tasks/item", { state: { id: id, row: row } });
@@ -217,9 +204,9 @@ console.log("ROW ",location?.state?.row)
       console.error(error);
     }
   };
-  useEffect(() => {
-    fetchTasks();
-  }, []);
+  // useEffect(() => {
+  //   fetchTasks();
+  // }, []);
   const handleClickOpen = () => {
     setPopperOpen(true);
   };
@@ -405,13 +392,13 @@ console.log("ROW ",location?.state?.row)
               </IconButton>
             }
           />
-        <Button
+        {/* <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleClickOpen}
         >
           Add
-        </Button>
+        </Button> */}
         <Box sx={{ backgroundColor: "#ffffff", pt: 2 }}>
           <Dialog
             open={poperOpen}
@@ -497,10 +484,10 @@ console.log("ROW ",location?.state?.row)
                     <TextField
                       autoFocus
                       margin="dense"
-                      id="budget"
-                      label="Budget"
+                      id="square_feet"
+                      label="square_feet"
                       type="number"
-                      value={task.budget}
+                      value={building.square_feet}
                       fullWidth
                       variant="outlined"
                       onChange={handleTaskChange}
@@ -532,15 +519,26 @@ console.log("ROW ",location?.state?.row)
             </form>
           </Dialog>
 
-          <Grid container justifyContent="Start" sx={{ mb: 2, mr: 3 }}>
-            <Typography variant="h5" component="h5">
-            {projectName} Project
-            </Typography>
-
-            {/* onClick={handleClickOpen} */}
-          </Grid>
+         <ListItem sx={{ mb: 2 }}>
+  <ListItemText
+    primary={
+      <Typography variant="h5" component="h5">
+        {projectName} Project
+      </Typography>
+    }
+    secondary={
+      <>
+        {location?.state?.row?.description}
+        {location?.state?.row?.location}
+        {location.state.row?.status}
+        {location.state.row?.end_date}
+        {location.state.row?.estimated_budget}
+      </>
+    }
+  />
+</ListItem>
            {/* <div dangerouslySetInnerHTML={{ __html: location?.state?.row?.description  }}></div> */}
-           {location?.state?.row?.description }
+          
            {/* <img
   src={`https://res.cloudinary.com/dj9cp8xcv/${IMG}`}
   alt={location?.state?.blueprints}

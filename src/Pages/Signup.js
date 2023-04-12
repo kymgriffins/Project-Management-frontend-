@@ -23,7 +23,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import { useNavigate,Link, useHistory } from "react-router-dom";
-
+import { URL } from "../Constants/constants";
 const Signup = () => {
     // const history = useHistory()
   const [role, setRole]=useState("")
@@ -35,8 +35,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const [error, setError] = useState("");
 //   const { signup } = useAuth();
-  // const URL = `http://127.0.0.1:8000/auth/register/`;
-  const URL = "https://web-production-f86e.up.railway.app/auth/register/"
+
   const [formData, setFormData] = useState({
     username:"",
     email: "",
@@ -79,7 +78,7 @@ const Signup = () => {
     try {
       // Send a signup request to the server
       // with email and password
-      const res = await axios.post(URL, data);
+      const res = await axios.post(`${URL}auth/register/`, data);
       // Extract the token from the response
       const token = res.data.access;
       console.log(token, "TOKEN");

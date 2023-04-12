@@ -18,6 +18,7 @@ import {
   Button,
   Typography,
 } from "@mui/material";
+import { URL } from "../Constants/constants";
 const Login = () => {
   const { authState } = useAuth();
 
@@ -28,8 +29,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const { login } = useAuth();
-  // const URL = `http://127.0.0.1:8000/auth/token/`;
-  const URL = "https://web-production-f86e.up.railway.app/auth/token/"
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -48,7 +48,7 @@ const Login = () => {
     try {
       // Send a login request to the server
       // with email and password
-      const res = await axios.post(URL, { email, password });
+      const res = await axios.post(`${URL}auth/token/`, { email, password });
       // Extract the token from the response
       const token = res.data.access;
       console.log(token, "TOKEN");
@@ -138,13 +138,15 @@ const Login = () => {
             sx={{ height: "100%", width: "100%", px: 10 }}
           >
             <Typography
-              variant="h4"
+              variant="h5"
               sx={{ letterSpacing: 4, mb: 6 }}
-              color="primary"
+              
+              color="#FBF5FF"
             >
               {" "}
               JENGA
             </Typography>
+            {/* <Typography variant="h5" color="#FBF5FF"> JENGA</Typography> */}
             <Typography variant="body1" sx={{ mb: 2 }} color="#aaaaaa">
               Fill in the following details to login
             </Typography>

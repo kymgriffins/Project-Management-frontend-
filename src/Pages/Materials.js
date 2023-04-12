@@ -41,9 +41,8 @@ import CardMedia from "@mui/material/CardMedia";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
+import { URL } from "../Constants/constants";
 
-// const URL = "http://127.0.0.1:8000/materials/";
-const URL = "https://web-production-f86e.up.railway.app/materials/"
 
 const Materials = () => {
   const [materials, setMaterials] = useState({
@@ -74,7 +73,7 @@ const Materials = () => {
     // formData.append("created_by", currentUser?.user_id);
 
     try {
-      const response = await axios.post(URL, formData, {
+      const response = await axios.post(`${URL}materials/`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -84,6 +83,7 @@ const Materials = () => {
       setSnackbarSeverity("success");
       setSnackBarOpen(true);
       setPopperOpen(false);
+      setMaterials({});
     } catch (error) {
       console.error(error);
       setSnackBarMessage("Failed to create material.");
@@ -92,7 +92,7 @@ const Materials = () => {
     }
   };
   const fetchMaterials = () => {
-    axios.get(URL).then((response) => {
+    axios.get(`${URL}materials/`).then((response) => {
       setAllMaterials(response.data).catch((error) =>
         console.log("This is the error", error)
       );

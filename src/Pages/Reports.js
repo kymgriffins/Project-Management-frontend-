@@ -49,7 +49,7 @@ import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-
+import { URL } from "../Constants/constants";
 import _ from "lodash";
 import Stack from "@mui/material/Stack";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -79,15 +79,7 @@ const theme = createTheme({
   },
 });
 
-// const URL = "http://127.0.0.1:8000/dailyrecords/";
-// const URL2 = "http://127.0.0.1:8000/material/used/";
-// const URL3 = "http://127.0.0.1:8000/record_pic/";
-const URL = "https://web-production-f86e.up.railway.app/dailyrecords/"
-const URL2 =   "https://web-production-f86e.up.railway.app/material/used/"
-const URL3 = "https://web-production-f86e.up.railway.app/record_pic/"
 
-// const URL = "https://posthere.io/a8f2-462f-ba98";
-// const URL2 = "https://posthere.io/a8f2-462f-ba98";
 
 const Reports = () => {
   const [report, setReport] = useState({
@@ -95,12 +87,13 @@ const Reports = () => {
     work_completed: "",
     work_planned: "",
     issues: "",
-    workers_pay: null,
+    workers_pay: '',
     total_spendings: "",
     documents: null,
     name: "",
   });
   const [loading, setLoading] = useState(false);
+  const [selectedProject, setSelectedProject] = useState("");
   // const [editorState, setEditorState] = useState(
   //   EditorState.createWithContent(ContentState.createFromText(report.scope))
   // );
@@ -109,6 +102,7 @@ const Reports = () => {
   // const location = useLocation();
 
   const [poperOpen, setPopperOpen] = useState(false);
+  const [projects, setProjects] = useState([]);
   // console.log("location", location.state);
   const [reports, setReports] = useState([]);
   // console.log("REPORTS",reports)
@@ -118,6 +112,7 @@ const Reports = () => {
   const [count, setCount] = useState({});
   const [allReports, setAllReports] = useState("");
   const [materials, setMaterials] = useState([]);
+  const [allProjects, setAllProjects] = useState([])
 
   const [selectedFiles, setSelectedFiles] = useState("");
   const [workCompleted, setWorkCompleted] = useState("");
@@ -128,7 +123,19 @@ const Reports = () => {
   const handleAddField = () => {
     setMaterialUsages([...materialUsages, { material: "", quantity_used: "" }]);
   };
+  const fetchProjects = () => {
+    axios.get(`${URL}projects/`).then((response) => {
+     
+  
+    
+      setProjects(response.data);
+      
+    });
+  };
 
+  useEffect(() => {
+    fetchProjects();
+  }, [projects]);
   const handleRemoveField = (index) => {
     const newMaterialUsages = [...materialUsages];
     newMaterialUsages.splice(index, 1);
@@ -146,6 +153,9 @@ const Reports = () => {
     newMaterialUsages[index].quantity_used = event.target.value;
     setMaterialUsages(newMaterialUsages);
   };
+  const handleSelectProject = (event) => {
+    setSelectedProject(event.target.value);
+  };
 
   const { currentUser } = useAuth();
   // console.log("Current User", currentUser);
@@ -161,14 +171,14 @@ const Reports = () => {
     try {
       setLoading(true);
       const formData = new FormData();
-      formData.append("project", 1);
+      formData.append("project", selectedProject);
       formData.append("work_completed", report.work_completed);
-      formData.append("work_planned", report.workPlanned);
+      formData.append("work_planned", report.work_planned);
       formData.append("issues", report.issues);
       formData.append("workers_pay", report.workers_pay);
-      formData.append("total_spendings", 100);
+      formData.append("total_spendings", 5600);
   
-      const response1 = await axios.post(URL, formData);
+      const response1 = await axios.post(`${URL}dailyrecords/`, formData);
       const dailyRecordId = response1.data.id;
   
       const materialUsagesData = materialUsages.map((materialUsage, index) => {
@@ -178,9 +188,17 @@ const Reports = () => {
           quantity_used: materialUsage.quantity_used,
         };
       });
+      const totalSpending = materialUsages.reduce((acc, materialUsage) => {
+        const materialPrice = materialUsage.material.price;
+        const quantityUsed = materialUsage.quantity_used;
+        return acc + (materialPrice * quantityUsed);
+      }, 0);
+      
+      console.log(totalSpending); // Output the total spending
+      
   
       const response2 = await Promise.all(
-        materialUsagesData.map((data) => axios.post(URL2, data))
+        materialUsagesData.map((data) => axios.post(`${URL}material/used/`, data))
       );
   
       const recordpicFormDataList = [];
@@ -191,7 +209,7 @@ const Reports = () => {
         recordpicFormDataList.push(recordpicFormData);
       });
       const uploadrecordpicResponses = await Promise.all(
-        recordpicFormDataList.map((formData) => axios.post(URL3, formData))
+        recordpicFormDataList.map((formData) => axios.post(`${URL}record_pic/`, formData))
       );
   
       // Set success message
@@ -200,6 +218,8 @@ const Reports = () => {
       setSnackBarOpen(true);
       setPopperOpen(false);
       setLoading(false);
+      setReport({})
+      setSelectedProject("")
     } catch (error) {
       // Check for specific error message
       if (error.response && error.response.status === 400) {
@@ -215,14 +235,14 @@ const Reports = () => {
   };
   
   const fetchReports = () => {
-    axios.get(URL).then((response) => {
+    axios.get(`${URL}dailyrecords/`).then((response) => {
       const orderedReports = _.orderBy(response.data, ["created_at"], ["desc"]);
 
       // Process the data as needed
       const rows = orderedReports.map((report, index) => ({
         id: index + 1,
         // name: report.name,
-        project: report.project.name,
+        project: report.project,
         workers_pay: report.workers_pay,
         total_spendings: report.total_spendings,
         date: report.date,
@@ -247,10 +267,22 @@ const Reports = () => {
       setAllReports(totalCount);
     });
   };
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get(`${URL}projects`);
+        setAllProjects(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
+    fetchProjects();
+  }, []);
   useEffect(() => {
     fetchReports();
   }, [reports]);
+  
   const handleShowReport = useCallback(
     (row) => () => {
       navigate("/reports/item", { state: { row: row } });
@@ -264,7 +296,7 @@ const Reports = () => {
   };
   useEffect(() => {
     const fetchMaterials = async () => {
-      const response = await axios.get("https://web-production-f86e.up.railway.app/materials/");
+      const response = await axios.get(`${URL}materials/`);
       setMaterials(response.data);
 
       // console.log(":::", response.data);
@@ -315,21 +347,23 @@ const Reports = () => {
     //   flex: 0.1,
     // },
     {
-      field: "project.name",
-      headerName: "Project Name ",
+      field: "project",
+      headerName: "Project Name",
       description: "",
       flex: 0.2,
       renderCell: (params) => {
-        // console.log("NAME PR", params);
+        const projectId = params.row?.project;
+        const project = allProjects.find((p) => p.id === projectId);
+        const projectName = project?.name;
+    
         return (
-          <>
-            <Typography variant="body2" component="body2">
-              {params.row?.project}
-            </Typography>
-          </>
+          <Typography variant="body2" component="body2">
+            {projectName}
+          </Typography>
         );
       },
     },
+    
     {
       field: "workers_pay",
       headerName: "Labor Cost",
@@ -533,78 +567,37 @@ const Reports = () => {
                           helperText="Enter the amount paid to contractors"
                         />
                       </Grid>
-
-                      <Grid item xs={12} md={6} sx={{ my: 2 }}>
-                        {materialUsages.map((materialUsage, index) => (
-                          <div
-                            key={index}
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              my: 1,
-                            }}
+                      <Grid item xs={12} md={6}>
+                          <InputLabel id="team-select-label">
+                            Select project
+                          </InputLabel>
+                          <Select
+                            labelId="team-select-label"
+                            value={selectedProject}
+                            onChange={handleSelectProject}
+                            style={{ width: "100%" }}
                           >
-                            <FormControl
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                width: "50%",
-                                mr: 2,
-                              }}
-                            >
-                              <InputLabel id={`material-select-label-${index}`}>
-                                Material
-                              </InputLabel>
-                              <Select
-                                labelId={`material-select-label-${index}`}
-                                value={materialUsage.material}
-                                onChange={(event) =>
-                                  handleMaterialChange(index, event)
-                                }
-                                sx={{ width: "25%" }}
-                              >
-                                {materials.map((material) => (
-                                  <MenuItem key={material.id} value={material}>
-                                    {material.name}
-                                  </MenuItem>
-                                ))}
-                              </Select>
-                            </FormControl>
+                            {projects.map((item) => (
+                              <MenuItem key={item.id} value={item.id}>
+                                {item.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </Grid>
+             
 
-                            <TextField
-                              label="Usage"
-                              value={materialUsage.quantity_used}
-                              onChange={(event) =>
-                                handleUsageChange(index, event)
-                              }
-                              sx={{ flex: 1, marginLeft: 2 }}
-                              inputProps={{ style: { padding: "12px 16px" } }}
-                              InputLabelProps={{ shrink: true }}
-                              helperText="Enter the quantity of material used"
-                            />
-
-                            {index > 0 && (
-                              <IconButton
-                                onClick={() => handleRemoveField(index)}
-                                sx={{ marginLeft: 2 }}
-                              >
-                                <DeleteIcon />
-                              </IconButton>
-                            )}
-
-                            {index === materialUsages.length - 1 && (
-                              <IconButton
-                                onClick={handleAddField}
-                                sx={{ marginLeft: 2 }}
-                              >
-                                <AddIcon />
-                              </IconButton>
-                            )}
-                          </div>
-                        ))}
+                      <Grid item xs={12} md={6}>
+                        <InputLabel id="blueprint-select-label">
+                          Upload Daily Photos
+                        </InputLabel>
+                        <input
+                          type="file"
+                          multiple
+                          onChange={handleFileInputChange}
+                        />
                       </Grid>
-
-                      <Grid item xs={12}>
+                     
+                      <Grid item xs={12} md={6}>
                         <TextField
                           autoFocus
                           margin="dense"
@@ -615,7 +608,7 @@ const Reports = () => {
                           fullWidth
                           variant="outlined"
                           multiline
-                          rows={5}
+                          rows={3}
                           InputLabelProps={{ shrink: true }}
                           inputProps={{ style: { padding: "12px 16px" } }}
                           onChange={handleReportChange}
@@ -623,16 +616,76 @@ const Reports = () => {
                         />
                       </Grid>
 
-                      <Grid item xs={12}>
-                        <InputLabel id="blueprint-select-label">
-                          Upload Blueprints
-                        </InputLabel>
-                        <input
-                          type="file"
-                          multiple
-                          onChange={handleFileInputChange}
-                        />
-                      </Grid>
+                      
+                      <Grid item xs={12} md={6} sx={{ my: 2 }}>
+        {materialUsages.map((materialUsage, index) => (
+          <div
+            key={index}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              my: 1,
+            }}
+          >
+            <FormControl
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                width: "50%",
+                mr: 2,
+              }}
+            >
+              <InputLabel id={`material-select-label-${index}`}>
+                Material
+              </InputLabel>
+              <Select
+                labelId={`material-select-label-${index}`}
+                value={materialUsage.material}
+                onChange={(event) =>
+                  handleMaterialChange(index, event)
+                }
+                sx={{ width: "25%" }}
+              >
+                {materials.map((material) => (
+                  <MenuItem key={material.id} value={material}>
+                    {material.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <TextField
+              label="Usage"
+              value={materialUsage.quantity_used}
+              onChange={(event) =>
+                handleUsageChange(index, event)
+              }
+              sx={{ flex: 1, marginLeft: 2 }}
+              inputProps={{ style: { padding: "12px 16px" } }}
+              InputLabelProps={{ shrink: true }}
+              helperText="Enter the quantity of material used"
+            />
+
+            {index > 0 && (
+              <IconButton
+                onClick={() => handleRemoveField(index)}
+                sx={{ marginLeft: 2 }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            )}
+
+            {index === materialUsages.length - 1 && (
+              <IconButton
+                onClick={handleAddField}
+                sx={{ marginLeft: 2 }}
+              >
+                <AddIcon />
+              </IconButton>
+            )}
+          </div>
+        ))}
+      </Grid>
                     </Grid>
                   </DialogContent>
                   {/* </form> */}

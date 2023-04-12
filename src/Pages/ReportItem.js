@@ -34,37 +34,41 @@ const ReportItem = () => {
       </Box>
 
       {activeTab === 0 && (
-        <Box sx={{ p: 3 }}>
-          <Typography variant="h6">Daily Report</Typography>
-          <List>
-            <ListItem>
-              <ListItemText primary="Date" secondary={reportItem.date} />
-            </ListItem>
-            <ListItem>
-              <ListItemText primary="Work Completed" secondary={reportItem.work_completed} />
-            </ListItem>
-             <ListItem>
-              <ListItemText primary="Work Planned" secondary={reportItem.work_planned} />
-            </ListItem>
-            <ListItem>
-              <ListItemText primary="Issues" secondary={reportItem.issues} />
-            </ListItem>
-            <ListItem>
-              <ListItemText primary="Total Spendings" secondary={reportItem.total_spendings} />
-            </ListItem>
-            <ListItem>
-              <ListItemText primary="Workers Pay" secondary={reportItem.workers_pay} />
-            </ListItem>
-          </List>
-        </Box>
-      )}
+  <Box sx={{ p: 3 }}>
+    <Typography variant="h6" sx={{ mb: 2 }}>Daily Report</Typography>
+    <List sx={{ mb: 4 }}>
+      <ListItem sx={{ mb: 2 }}>
+        <ListItemText primary="Date" secondary={reportItem.date} />
+      </ListItem>
+      <ListItem sx={{ mb: 2 }}>
+        <ListItemText primary="Work Completed" secondary={reportItem.work_completed} />
+      </ListItem>
+      <ListItem sx={{ mb: 2 }}>
+        <ListItemText primary="Work Planned" secondary={reportItem.work_planned} />
+      </ListItem>
+      <ListItem sx={{ mb: 2 }}>
+        <ListItemText primary="Issues" secondary={reportItem.issues} />
+      </ListItem>
+      <ListItem sx={{ mb: 2 }}>
+        <ListItemText primary="Total Spendings" secondary={reportItem.total_spendings} />
+      </ListItem>
+      <ListItem sx={{ mb: 2 }}>
+        <ListItemText primary="Workers Pay" secondary={reportItem.workers_pay} />
+      </ListItem>
+    </List>
+    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      {/* <Button variant="contained" color="primary">Edit Report</Button> */}
+    </Box>
+  </Box>
+)}
+
 
       {activeTab === 1 && (
         <Box sx={{ p: 3 }}>
           <Typography variant="h6">Materials Used</Typography>
           <List>
             {reportItem.materials.map((material) => (
-              <ListItem key={material.id}>
+              <ListItem key={material.id} sx={{ mb: 2 }}>
                 <ListItemAvatar>
                   <Avatar>{material.id}</Avatar>
                 </ListItemAvatar>

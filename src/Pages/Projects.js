@@ -27,6 +27,9 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Step,
+  StepLabel,
+  Stepper,
 } from "@mui/material";
 import { StatusBox } from "../Components/StatusBox";
 import { Visibility } from "@mui/icons-material";
@@ -53,6 +56,7 @@ import _ from "lodash";
 import Stack from "@mui/material/Stack";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import CloseIcon from "@mui/icons-material/Close";
+import { URL } from "../Constants/constants";
 
 const theme = createTheme({
   typography: {
@@ -77,13 +81,8 @@ const theme = createTheme({
     },
   },
 });
+const steps = ["Step 1", "Step 2"];
 
-// const URL = "http://127.0.0.1:8000/projects/";
-// const BLUPRINTURL = "http://127.0.0.1:8000/blueprint/"
-// const URL = "http://127.0.0.1:8000/projects/";
-
-const URL = "https://web-production-f86e.up.railway.app/projects/"
-const BLUPRINTURL = "https://web-production-f86e.up.railway.app/blueprint/"
 
 const Projects = () => {
   const [project, setProject] = useState({
@@ -91,7 +90,7 @@ const Projects = () => {
     description: "",
     scope: "",
     startDate: null,
-    endDate: "",
+    endDate: null,
     budget: "",
     supervisor: "",
     architect: "",
@@ -99,6 +98,14 @@ const Projects = () => {
     location: "",
     blueprints: "",
   });
+
+  const [activeStep, setActiveStep] = useState(0);
+  const [building, setBuilding]= useState({
+    floors :"",
+    owner:"",
+    project : "",
+    square_feet:""
+  })
   const [loading, setLoading] = useState(false);
   // const [editorState, setEditorState] = useState(
   //   EditorState.createWithContent(ContentState.createFromText(project.scope))
@@ -133,7 +140,49 @@ const Projects = () => {
     }
     setSnackBarOpen(false);
   };
-  const endDate = moment(project.endDate).format("MMMM Do YYYY");
+  const endDate = moment(project?.endDate).format("YYYY-MM-DD");
+  console.log(endDate, "EDM")
+  console.log("P",project?.endDate)
+
+  const handleBuildingChange = (e) => {
+    const { id, value } = e.target;
+    setBuilding({ ...building, [id]: value });
+  };
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleReset = () => {
+    setActiveStep(0);
+  };
+  const renderStepContent = () => {
+    switch (activeStep) {
+      case 0:
+        return (
+          <div>
+            
+          </div>
+        );
+      case 1:
+        return (
+          <div>
+           
+          </div>
+        );
+      case 2:
+        return (
+          <div>
+            
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   const handleCreateProject = async () => {
     try {
@@ -145,14 +194,14 @@ const Projects = () => {
         location: project.location,
         start_date: project.start_date,
         end_date: endDate,
-        status: "on-hold",
+        status: "cancelled",
         estimated_budget: project.budget,
         supervisor: currentUser?.user_id,
         architect: currentUser?.user_id,
         foreman: selectedForeman,
         created_by: currentUser?.user_id,
       };
-      const createProjectResponse = await axios.post(URL, projectData);
+      const createProjectResponse = await axios.post(`${URL}projects/`, projectData);
       if (createProjectResponse.status === 201) {
         const projectId = createProjectResponse.data.id;
   
@@ -166,7 +215,7 @@ const Projects = () => {
         });
         const uploadBlueprintResponses = await Promise.all(
           blueprintFormDataList.map((formData) =>
-            axios.post(BLUPRINTURL, formData)
+            axios.post(`${URL}blueprint/`, formData)
           )
         );
   
@@ -175,6 +224,8 @@ const Projects = () => {
         setSnackbarSeverity("success");
         setSnackBarOpen(true);
         setPopperOpen(false);
+        setProject({ name: "", description: "", location: "", start_date: "", budget: "" });
+
         // navigate(`/projects/${projectId}`);
       } else {
         throw new Error("Failed to create project");
@@ -200,7 +251,7 @@ const Projects = () => {
   
 
   const fetchProjects = () => {
-    axios.get(URL).then((response) => {
+    axios.get(`${URL}projects/`).then((response) => {
       const orderedProjects = _.orderBy(
         response.data,
         ["created_at"],
@@ -213,7 +264,8 @@ const Projects = () => {
         location: project.location,
         end_date: project.end_date,
         estimated_budget: project.estimated_budget,
-        blueprints:project.blueprints
+        blueprints:project.blueprints,
+        description:project.description
       }));
       console.log(orderedProjects.blueprints)
   
@@ -248,7 +300,7 @@ const Projects = () => {
   
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await axios.get("http://127.0.0.1:8000/auth/register/");
+      const response = await axios.get(`${URL}auth/register/`);
       setArchitects(
         response.data.filter((user) => user.roles.includes("architect"))
       );
@@ -280,9 +332,6 @@ const Projects = () => {
 
   const handleClose = () => {
     setPopperOpen(false);
-  };
-  const handleChange = (value) => {
-    setDescription(value);
   };
 
   const handleProjectChange = (event) => {
@@ -323,29 +372,7 @@ const Projects = () => {
       description: "Site Location",
       flex: 0.1,
     },
-    // {
-    //   field: "description",
-    //   headerName: "Description",
-    //   description: "",
-    //   flex: 0.3,
-    // },
-
-    // {
-    //   field: "created_at",
-    //   headerName: "Date Started",
-    //   description: "",
-    //   flex: 0.2,
-    //   renderCell: (params) => {
-    //     console.log("checkout", params);
-    //     return (
-    //       <>
-    //         <Typography variant="body2" component="body2">
-    //           {moment(params.value).format("MMMM Do YYYY")}
-    //         </Typography>
-    //       </>
-    //     );
-    //   },
-    // },
+  
     {
       field: "estimated_budget",
       headerName: "Budget",
@@ -438,9 +465,9 @@ const Projects = () => {
       
       <Container maxWidth="xl">
         
-      <Box sx={{ display: 'flex' }}>
+      {/* <Box sx={{ display: 'flex' }}>
       <CircularProgress />
-    </Box>
+    </Box> */}
         <Box sx={{ backgroundColor: "#ffffff", pt: 0 }}>
           <Snackbar
             open={snackBarOpen}
@@ -472,6 +499,13 @@ const Projects = () => {
               </IconButton>
             }
           />
+           {/* <Stepper activeStep={activeStep}>
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper> */}
           <Grid container justifyContent="end" sx={{ mb: 2, mr: 3 }}>
             {/* <TextField
             fullWidth={false}
@@ -497,39 +531,7 @@ const Projects = () => {
               Add
             </Button>
             <Grid container direction="row" spacing={4}>
-              {/* <Grid item md={3}>
-              <TaskBox
-                color="success"
-                primaryText={3}
-                secondaryText="No of projects"
-                testId="total-feedbacks-stat"
-                bgColor="primary"
-              />
-            </Grid>
-            <Grid item md={3}>
-              <StatisticBox
-                color="primaryLight"
-                primaryText={455}
-                secondaryText="Pending Projects"
-                testId="pending-feedbacks-stat"
-              />
-            </Grid>
-            <Grid item md={3}>
-              <StatisticBox
-                color="primaryLightd"
-                primaryText={33}
-                secondaryText="Ongoing Projects"
-                testId="reassignment-feedbacks-stat"
-              />
-            </Grid>
-            <Grid item md={3}>
-              <StatisticBox
-                color="danger"
-                primaryText={233}
-                secondaryText="Completed Projects"
-                testId="closed-feedbacks-stat"
-              />
-            </Grid> */}
+             
             </Grid>
             <Dialog
               open={poperOpen}
@@ -578,23 +580,7 @@ const Projects = () => {
                             onChange={handleProjectChange}
                           />
                         </Grid>
-                        {/* <Grid item xs={12} md={6}>
-                          <InputLabel id="team-select-label">
-                            Select Architect
-                          </InputLabel>
-                          <Select
-                            labelId="team-select-label"
-                            value={selectedArchitect}
-                            onChange={handleSelectArch}
-                            style={{ width: "100%" }}
-                          >
-                            {architects.map((item) => (
-                              <MenuItem key={item.id} value={item.id}>
-                                {item.username}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </Grid> */}
+                        
                         <Grid item xs={12} md={6}>
                           <InputLabel id="team-select-label">
                             Select Foreman
@@ -649,7 +635,23 @@ const Projects = () => {
                         </Grid>
                         <Grid item xs={12} md={6}>
                         <InputLabel id="team-select-label">
-                            Project Budget
+                           Square feet
+                          </InputLabel>
+                          <TextField
+                            autoFocus
+                            margin="dense"
+                            id="square_feet"
+                            // label="Budget"
+                            type="number"
+                            value={building.square_feet}
+                            fullWidth
+                            variant="outlined"
+                            onChange={handleBuildingChange}
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                        <InputLabel id="team-select-label">
+                            Project Description
                           </InputLabel>
                           <TextField
                       autoFocus

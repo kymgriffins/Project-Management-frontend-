@@ -12,27 +12,29 @@ import AddBusinessIcon from '@mui/icons-material/AddBusiness';
 import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
 import axios  from 'axios';
 import { Typography } from '@mui/material';
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { URL } from '../Constants/constants';
 const sidebarNavItems = [
     {
         display: 'Dashboard',
         icon: <DashboardCustomizeIcon/>,
         to: '/',
         section: 'home',
-        roles: ["owner", "architect", "manager", "foreman","contractor"],
+        roles: ["owner", "architect", "manager", "foreman"],
     },
     {
         display: 'Projects',
         icon: <AddBusinessIcon/>,
         to: '/projects',
         section: 'projects',
-        roles: ["owner", "architect", "manager", "foreman","contractor"],
+        roles: ["owner", "architect", "manager", "foreman"],
     },
     {
         display: 'Materials',
         icon: <HandymanIcon/>,
         to: '/materials',
         section: 'materials',
-        roles: [ "architect", "manager", "foreman","contractor"],
+        roles: [ "", "manager", "foreman","contractor"],
     },
     // {
     //     display: 'My Tasks',
@@ -74,6 +76,34 @@ const sidebarNavItems = [
     //     section: 'meetings'
     // }
 ]
+// const WhiteTextTypography = withStyles({
+//   root: {
+//     color: "#FFFFFF"
+//   }
+// })(Typography);
+const theme = createTheme({
+    typography: {
+      fontFamily: "Inter",
+    },
+    palette: {
+      primary: {
+        main: "#2196f3", // change primary color
+      },
+      success: {
+        main: "#4caf50", // change success color
+      },
+      error: {
+        main: "#f44336", // change error color
+      },
+      background: {
+        default: "#ffffff", // change default background color
+      },
+      text: {
+        primary: "#333333", // change primary text color
+        secondary: "#999999", // change secondary text color
+      },
+    },
+  });
 
 const Sidebar = () => {
     const [activeIndex, setActiveIndex] = useState(0);
@@ -81,13 +111,13 @@ const Sidebar = () => {
     const sidebarRef = useRef();
     const indicatorRef = useRef();
     const location = useLocation();
-    const [role, setRole] = useState("");
+    const [role, setRole] = useState([]);
     const { currentUser } = useAuth();
     console.log(currentUser?.user_id, "USER");
     // find user object with the above user_id in http://127.0.0.1:8000/auth/register/
     const userId = currentUser?.user_id;
     axios
-    .get(`https://web-production-f86e.up.railway.app/auth/register/`)
+    .get(`${URL}/auth/register/`)
     .then((response) => {
       const user = response.data.find((u) => u.id === userId); // Filter user with matching user_id
       console.log(user); // user object
@@ -108,24 +138,29 @@ const Sidebar = () => {
 
     // change active index
     useEffect(() => {
-        const curPath = window.location.pathname.split('/')[1];
-        const activeItem = sidebarNavItems.findIndex(item => item.section === curPath);
-        setActiveIndex(curPath.length === 0 ? 0 : activeItem);
-    }, [location]);
-    const filteredSidebarNavItems = sidebarNavItems.filter((item) =>
-    item.roles.includes(role)
-  );
+        const curPath = location.pathname.split('/')[1];
+        const activeItem = filteredSidebarNavItems.findIndex(item => item.section === curPath);
+        setActiveIndex(activeItem !== -1 ? activeItem : 0);
+      }, [location]);
+      
+      const filteredSidebarNavItems = sidebarNavItems.filter((item) =>
+      item.roles.some(r => role.includes(r))
+    );
+//   useEffect(() => {
+//     setTimeout(() => {
+//       indicatorRef.current.style.height = `${sidebarRef.current.clientHeight}px`;
+//       setStepHeight(sidebarRef.current.clientHeight / filteredSidebarNavItems.length);
+//     }, 50);
+//   }, [filteredSidebarNavItems]);
+  
 
     return <div className='sidebar'>
         <div className="sidebar__logo">
-        <Typography
-              variant="h4"
-            //   sx={{ letterSpacing: 4, mb: 6 }}
-              color="primary"
-            >
-              {" "}
-              JENGA
-            </Typography>
+  <Typography variant="h4" color="primary">
+  JENGA
+</Typography>
+
+
         </div>
         <div ref={sidebarRef} className="sidebar__menu">
             <div
